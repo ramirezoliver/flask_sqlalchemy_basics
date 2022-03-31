@@ -113,3 +113,9 @@ def create_random_data():
     add_orders()
     add_products()
     add_order_products()
+
+def get_orders_by_id(customer_id=1):
+    print('Get Orders by Customers')
+    customer_orders = Order.query.filter_by(customer_id=customer_id).all()
+    for order in customer_orders:
+        print(order.customer.first_name, order.id, order.order_date)
