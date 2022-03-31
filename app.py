@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from faker import Faker
 
+import random
+
 fake = Faker()  
 
 app = Flask(__name__)
