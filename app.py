@@ -144,3 +144,16 @@ def revenue_in_last_x_days(x_days=30):
     .filter(Order.order_date > (datetime.now()-timedelta(days=x_days))
     ).scalar()
     )
+
+def average_fulfillment_time():
+    print('Average fulfillment time')
+    print(
+        db.session.query(
+        db.func.time(
+            db.func.avg(
+                db.func.strftime('%s',Order.shipped_date) - db.func.strftime('%s',Order.order_date)
+                ),
+                'unixepoch'
+            )   
+        ).filter(Order.shipped_date.isnot(None)).scalar()
+    )
