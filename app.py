@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 from faker import Faker
 
 import random
@@ -135,3 +135,12 @@ def orders_with_discount_coupon():
     orders = Order.query.filter(Order.coupon_code.isnot(None)).filter(Order.coupon_code != 'FREESHIPPING').all()
     for order in orders:
         print(order.id, order.coupon_code)
+
+def revenue_in_last_x_days(x_days=30):
+    print('Revenue past x days')
+    print(db.session
+    .query(db.func.sum(Product.price))
+    .join(order_product).join(Order)
+    .filter(Order.order_date > (datetime.now()-timedelta(days=x_days))
+    ).scalar()
+    )
