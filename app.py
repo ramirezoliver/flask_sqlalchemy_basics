@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from faker import Faker
+
+fake = Faker()  
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -37,3 +40,74 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
     price = db.Column(db.Integer, nullable=False)
+
+def add_customers():
+    for _ in range(100):
+        customer = Customer(
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            address=fake.street_address(),
+            city=fake.city(),
+            postcode=fake.postcode(),
+            email=fake.email()
+        )
+        db.session.add(customer)
+    db.session.commit()
+
+def add_orders():
+    customers = Customer.query.all()
+
+    for _ in range(1000):
+        #choose a random customer
+        customer = random.choice(customers)
+
+        ordered_date = fake.date_time_this_year()
+        shipped_date = random.choices([None, fake.date_time_between(start_date=ordered_date)], [10, 90])[0]
+
+        #choose either random None or random date for delivered and shipped
+        delivered_date = None
+        if shipped_date:
+            delivered_date = random.choices([None, fake.date_time_between(start_date=shipped_date)], [50, 50])[0]
+
+        #choose either random None or one of three coupon codes
+        coupon_code = random.choices([None, '50OFF', 'FREESHIPPING', 'BUYONEGETONE'], [80, 5, 5, 5])[0]
+
+        order = Order(
+            customer_id=customer.id,
+            order_date=ordered_date,
+            shipped_date=shipped_date,
+            delivered_date=delivered_date,
+            coupon_code=coupon_code
+        )
+
+        db.session.add(order)
+    db.session.commit()
+
+def add_products():
+    for _ in range(10):
+        product = Product(
+            name=fake.color_name(),
+            price=random.randint(10,100)
+        )
+        db.session.add(product)
+    db.session.commit()
+    
+def add_order_products():
+    orders = Order.query.all()
+    products = Product.query.all()
+
+    for order in orders:
+        #select random k
+        k = random.randint(1, 3)
+        # select random products
+        purchased_products = random.sample(products, k)
+        order.products.extend(purchased_products)
+        
+    db.session.commit()
+
+def create_random_data():
+    db.create_all()
+    add_customers()
+    add_orders()
+    add_products()
+    add_order_products()
