@@ -119,3 +119,19 @@ def get_orders_by_id(customer_id=1):
     customer_orders = Order.query.filter_by(customer_id=customer_id).all()
     for order in customer_orders:
         print(order.customer.first_name, order.id, order.order_date)
+
+def get_pending_orders():
+    print('Pending Orders')
+    pending_orders = Order.query.filter(Order.shipped_date.is_(None)).order_by(Order.order_date.desc()).all()
+    for order in pending_orders:
+        print(order.id, order.order_date)
+
+def how_many_customers():
+    print('How many customers?')
+    print(Customer.query.count())
+
+def orders_with_discount_coupon():
+    print('Orders with coupon code')
+    orders = Order.query.filter(Order.coupon_code.isnot(None)).filter(Order.coupon_code != 'FREESHIPPING').all()
+    for order in orders:
+        print(order.id, order.coupon_code)
